@@ -54,3 +54,20 @@ export const findUserById = async (id) => {
 
   return rows[0];
 };
+
+//update user by email
+export const updateUserByEmail = async (email, updateData) => {
+  const fields = Object.keys(updateData)
+    .map((key) => `${key} = ?`)
+    .join(", ");
+  const values = Object.values(updateData);
+
+  const sql = `UPDATE users SET ${fields} WHERE email = ?`;
+  return new Promise((resolve, reject) => {
+    db.query(sql, [...values, email], (err, result) => {
+      if (err) reject(err);
+      else resolve(result);
+    });
+  });
+};
+

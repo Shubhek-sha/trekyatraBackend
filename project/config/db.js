@@ -14,11 +14,11 @@ const pool = mysql.createPool({
 pool
   .getConnection()
   .then((conn) => {
-    console.log("✅ MySQL connected successfully");
+    console.log(" MySQL connected successfully");
     conn.release();
   })
   .catch((err) => {
-    console.error("❌ DB connection failed:", err.message);
+    console.error(" DB connection failed:", err.message);
     // Don't exit - the API can still work with delayed DB operations
   });
 
@@ -33,7 +33,7 @@ const query = async (sql, args = []) => {
       connection.release();
     }
   } catch (error) {
-    console.error("❌ Database Query Error:", error.message);
+    console.error(" Database Query Error:", error.message);
     console.error("SQL:", sql);
     console.error("Args:", args);
     throw error;
