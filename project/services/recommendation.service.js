@@ -1,41 +1,37 @@
-import db from "../config/db.js";
+import prisma from "../config/prisma.js";
 
 export const getRecommendedTreks = async (userId) => {
   try {
     // 1️⃣ Get user preferences
-    const [userRows] = await db.query(
-      `SELECT 
-        fitness_level,
-        preferred_difficulty,
-        preferred_max_duration
-       FROM users
-       WHERE user_id = ?`,
-      [userId],
-    );
-
-    const user = userRows[0];
+    const user = await prisma.user.findUnique({
+      where: { user_id: parseInt(userId) },
+      select: {
+        fitness_level: true,
+        preferred_difficulty: true,
+        preferred_max_duration: true,
+      },
+    });
 
     if (!user) {
       throw new Error("User not found");
     }
 
     // 2️⃣ Get matching treks
-    const [treks] = await db.query(
-      `
-      SELECT *
-      FROM treks
-      WHERE difficulty = ?
-      AND duration_days <= ?
-      AND fitness_level_required <= ?
-      ORDER BY popularity_score DESC
-      LIMIT 5
-      `,
-      [
-        user.preferred_difficulty,
-        user.preferred_max_duration,
-        user.fitness_level,
-      ],
-    );
+    const treks = await prisma.trek.findMany({
+      where: {
+        difficulty: user.preferred_difficulty,
+        duration_days: {
+          lte: user.preferred_max_duration,
+        },
+        fitness_level_required: {
+          lte: user.fitness_level,
+        },
+      },
+      orderBy: {
+        popularity_score: "desc",
+      },
+      take: 5,
+    });
 
     return treks;
   } catch (error) {
