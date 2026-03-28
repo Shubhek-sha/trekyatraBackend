@@ -193,3 +193,27 @@ export const getProfile = async (req, res) => {
     res.status(500).json({error: error.message});
   }
 };
+
+//update password
+export const updatePassword = async (req, res) => {
+  const {email, password} = req.body;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {email},
+    });
+
+    if (!user) return res.status(404).json({message: 'User not found'});
+
+    const newPassword = await bcrypt.hash(password, 10);
+
+    // Clear OTP
+    await prisma.user.update({
+      where: {email},
+      data: {password_hash: newPassword},
+    });
+    res.json({message: 'Password updated successfully.'});
+  } catch (error) {
+    res.status(500).json({error: error.message});
+  }
+};
