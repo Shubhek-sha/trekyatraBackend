@@ -43,19 +43,19 @@ model Trek {
   distanceKm               Float
   maxAltitudeM             Int
   altitudeGainM            Int
-  terrainTypes             Json        // ["mountain", "glacier", ...]
-  bestSeasons              Json        // ["spring", "autumn"]
+  terrainTypes             Json
+  bestSeasons              Json
   temperatureMin           Int
   temperatureMax           Int
   permitsRequired          Boolean
-  permitDetails            String?
+  permitDetails            String?     @db.Text
   guideMandatory           Boolean
   fitnessLevelRequired     String
   startingPoint            String
   endingPoint              String
   baseCampAltitudeM        Int?
   dailyTrekHours           Float
-  accommodationType        Json        // ["teahouse", "lodge", ...]
+  accommodationType        Json
   waterAvailability        String
   mobileNetwork            String
   riskLevel                String
@@ -65,22 +65,22 @@ model Trek {
   estimatedCostMinUsd      Int
   estimatedCostMaxUsd      Int
   currency                 String      @default("USD")
-  attractions              Json        // ["Mount Everest", ...]
-  wildlifePossible         Json        // ["Snow Leopard", ...]
-  culturalSignificance     String?
+  attractions              Json
+  wildlifePossible         Json
+  culturalSignificance     String?     @db.Text
   averageRating            Float       @default(0)
   totalReviews             Int         @default(0)
   popularityScore          Int         @default(0)
   foodAvailability         String
-  languageSpoken           Json        // ["Nepali", "English"]
+  languageSpoken           Json
   groupSizeMin             Int
   groupSizeMax             Int
   province                 String
-  bestFor                  Json        // ["adventure seekers", ...]
+  bestFor                  Json
   description              String      @db.Text
   shortDescription         String      @db.Text
-  images                   Json        // ["https://...", ...]
-  itinerary                Json        // [{ day, place, latitude, longitude, description }]
+  images                   Json
+  itinerary                Json
   createdAt                DateTime    @default(now())
   updatedAt                DateTime    @updatedAt
   trek_images              TrekImage[]
@@ -89,13 +89,64 @@ model Trek {
 }
 
 model TrekImage {
-  image_id   Int     @id @default(autoincrement())
-  user_id    Int
-  trekId     String  // matches Trek.trekId type (String)
-  url        String
-  caption    String?
-  is_cover   Int     @default(0)
-  sort_order Int?    @default(0)
+  image_id                 Int      @id @default(autoincrement())
+  user_id                  Int
+  trekId                   String // matches Trek.trekId type (String)
+  url                      String
+  caption                  String?
+  is_cover                 Int      @default(0)
+  sort_order               Int?     @default(0)
+
+  // All Trek fields for caching/duplication
+  name                     String
+  location                 String
+  region                   String
+  country                  String
+  difficulty               String
+  durationDays             Int
+  distanceKm               Float
+  maxAltitudeM             Int
+  altitudeGainM            Int
+  terrainTypes             Json // ["mountain", "glacier", ...]
+  bestSeasons              Json // ["spring", "autumn"]
+  temperatureMin           Int
+  temperatureMax           Int
+  permitsRequired          Boolean
+  permitDetails            String?  @db.Text
+  guideMandatory           Boolean
+  fitnessLevelRequired     String
+  startingPoint            String
+  endingPoint              String
+  baseCampAltitudeM        Int?
+  dailyTrekHours           Float
+  accommodationType        Json // ["teahouse", "lodge", ...]
+  waterAvailability        String
+  mobileNetwork            String
+  riskLevel                String
+  altitudeSicknessRisk     String
+  nearestMedicalFacilityKm Float
+  evacuationPossible       Boolean
+  estimatedCostMinUsd      Int
+  estimatedCostMaxUsd      Int
+  currency                 String   @default("USD")
+  attractions              Json // ["Mount Everest", ...]
+  wildlifePossible         Json // ["Snow Leopard", ...]
+  culturalSignificance     String?  @db.Text
+  averageRating            Float    @default(0)
+  totalReviews             Int      @default(0)
+  popularityScore          Int      @default(0)
+  foodAvailability         String
+  languageSpoken           Json // ["Nepali", "English"]
+  groupSizeMin             Int
+  groupSizeMax             Int
+  province                 String
+  bestFor                  Json // ["adventure seekers", ...]
+  description              String   @db.Text
+  shortDescription         String   @db.Text
+  images                   Json // ["https://...", ...]
+  itinerary                Json // [{ day, place, latitude, longitude, description }]
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
 
   user User? @relation(fields: [user_id], references: [user_id])
   trek Trek? @relation(fields: [trekId], references: [trekId])
