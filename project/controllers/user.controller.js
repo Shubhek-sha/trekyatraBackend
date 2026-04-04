@@ -3,12 +3,9 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import prisma from '../config/prisma.js';
 import {generateOTP} from '../utils/otp.js';
+import {sendOtp} from '../utils/sendOtp.js';
 
 dotenv.config();
-
-// export const generateOTP = () => {
-//   return Math.floor(100000 + Math.random() * 900000).toString();
-// };
 
 export const registerUser = async (req, res) => {
   try {
@@ -16,15 +13,13 @@ export const registerUser = async (req, res) => {
       where: {email: req.body.email},
     });
 
-    //check if the user is verified or not if not allow annother user with same email to do register
     if (existingUser) {
       return res.status(400).json({message: 'Email already registered'});
     }
 
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
-    // const otpGenerated = generateOTP();
-    const otpGenerated = '123456';
+    const otpGenerated = generateOTP();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
     const user = await prisma.user.create({
@@ -39,12 +34,20 @@ export const registerUser = async (req, res) => {
       },
     });
 
-    res.status(201).json({
-      message: 'User registered. OTP sent to email.',
+    // Send OTP
+    const result = await sendOtp(req.body.email, otpGenerated);
+
+    if (!result.success) {
+      return res.status(500).json({message: 'Failed to send OTP'});
+    }
+
+    return res.status(201).json({
+      message: 'User registered successfully. OTP sent to email.',
       user: user,
     });
   } catch (error) {
-    res.status(500).json({error: error.message});
+    console.error(error);
+    return res.status(500).json({error: error.message});
   }
 };
 
@@ -62,6 +65,12 @@ export const resendOTP = async (req, res) => {
     const otpGenerated = generateOTP();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
+    // Send OTP
+    const result = await sendOtp(req.body.email, otpGenerated);
+
+    if (!result.success) {
+      return res.status(500).json({message: 'Failed to send OTP'});
+    }
     await prisma.user.update({
       where: {email},
       data: {otp: otpGenerated, otp_expires: otpExpires},

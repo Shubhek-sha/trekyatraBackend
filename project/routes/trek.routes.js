@@ -1,17 +1,15 @@
-import express from "express";
+// routes/trek.routes.js
 
-import {
-  fetchTreks,
-  fetchSingleTrek,
-  addTrek,
-} from "../controllers/trek.controller.js";
+import {Router} from 'express';
+import {createTrek, getAllTreks, getTrekById, updateTrek, deleteTrek, updateItinerary} from '../controllers/trek.controller.js'; // <-- .js extension required for ESM
 
-const router = express.Router();
+const router = Router();
 
-router.get("/", fetchTreks);
-
-router.get("/:id", fetchSingleTrek);
-
-router.post("/", addTrek);
+router.get('/', getAllTreks); // GET    /api/treks
+router.post('/', createTrek); // POST   /api/treks
+router.get('/:id', getTrekById); // GET    /api/treks/:id
+router.patch('/:id', updateTrek); // PATCH  /api/treks/:id
+router.delete('/:id', deleteTrek); // DELETE /api/treks/:id
+router.patch('/:id/itinerary', updateItinerary); // PATCH  /api/treks/:id/itinerary
 
 export default router;
