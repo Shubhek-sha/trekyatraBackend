@@ -12,7 +12,7 @@ export const sendOtp = async (email, otp) => {
     });
 
     await transporter.sendMail({
-      from: `"SummitTrail" <${process.env.EMAIL_USER}>`,
+      from: `"TrekYatra" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: '🏔️ Your Verification Code',
       text: `Your OTP is ${otp}. Valid for 1 minute.`,
