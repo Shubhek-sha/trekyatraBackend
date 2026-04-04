@@ -9,32 +9,33 @@ datasource db {
 }
 
 model User {
-  user_id                Int         @id @default(autoincrement())
-  email                  String      @unique
+  user_id                Int           @id @default(autoincrement())
+  email                  String        @unique
   password_hash          String
   full_name              String?
-  username               String?     @unique
+  username               String?       @unique
   profile_picture        String?
   phone                  String?
-  date_of_birth          DateTime?   @db.Date
+  date_of_birth          DateTime?     @db.Date
   fitness_level          Int?
   preferred_difficulty   String?
   preferred_max_duration Int?
-  location_country       String?     @default("Nepal")
+  location_country       String?       @default("Nepal")
   location_city          String?
-  bio                    String?     @db.Text
+  bio                    String?       @db.Text
   otp                    String?
   otp_expires            DateTime?
-  isVerified             Boolean     @default(false)
+  isVerified             Boolean       @default(false)
   trek_images            TrekImage[]
   reviews                Review[]
+  image_uploads          ImageUpload[]
 
   @@map("users")
 }
 
 model Trek {
-  id                       String      @id @default(cuid())
-  trekId                   String      @unique
+  id                       String        @id @default(cuid())
+  trekId                   String        @unique
   name                     String
   location                 String
   region                   String
@@ -49,7 +50,7 @@ model Trek {
   temperatureMin           Int
   temperatureMax           Int
   permitsRequired          Boolean
-  permitDetails            String?     @db.Text
+  permitDetails            String?       @db.Text
   guideMandatory           Boolean
   fitnessLevelRequired     String
   startingPoint            String
@@ -65,39 +66,40 @@ model Trek {
   evacuationPossible       Boolean
   estimatedCostMinUsd      Int
   estimatedCostMaxUsd      Int
-  currency                 String      @default("USD")
+  currency                 String        @default("USD")
   attractions              Json
   wildlifePossible         Json
-  culturalSignificance     String?     @db.Text
-  averageRating            Float       @default(0)
-  totalReviews             Int         @default(0)
-  popularityScore          Int         @default(0)
+  culturalSignificance     String?       @db.Text
+  averageRating            Float         @default(0)
+  totalReviews             Int           @default(0)
+  popularityScore          Int           @default(0)
   foodAvailability         String
   languageSpoken           Json
   groupSizeMin             Int
   groupSizeMax             Int
   province                 String
   bestFor                  Json
-  description              String      @db.Text
-  shortDescription         String      @db.Text
+  description              String        @db.Text
+  shortDescription         String        @db.Text
   images                   Json
   itinerary                Json
-  createdAt                DateTime    @default(now())
-  updatedAt                DateTime    @updatedAt
+  createdAt                DateTime      @default(now())
+  updatedAt                DateTime      @updatedAt
   trek_images              TrekImage[]
   reviews                  Review[]
+  image_uploads            ImageUpload[]
 
   @@map("treks")
 }
 
 model TrekImage {
-  image_id                 Int      @id @default(autoincrement())
-  user_id                  Int
-  trekId                   String // matches Trek.trekId type (String)
-  url                      String
-  caption                  String?
-  is_cover                 Int      @default(0)
-  sort_order               Int?     @default(0)
+  image_id   Int     @id @default(autoincrement())
+  user_id    Int
+  trekId     String // matches Trek.trekId type (String)
+  url        String
+  caption    String?
+  is_cover   Int     @default(0)
+  sort_order Int?    @default(0)
 
   // All Trek fields for caching/duplication
   name                     String
@@ -165,8 +167,22 @@ model Review {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user      User     @relation(fields: [userId], references: [user_id], onDelete: Cascade)
-  trek      Trek     @relation(fields: [trekId], references: [trekId], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+  trek Trek @relation(fields: [trekId], references: [trekId], onDelete: Cascade)
 
   @@map("reviews")
+}
+
+model ImageUpload {
+  imageId   Int      @id @default(autoincrement())
+  userId    Int
+  trekId    String
+  images    Json // Using Json to store an array of image strings natively in MySQL
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+  trek Trek @relation(fields: [trekId], references: [trekId], onDelete: Cascade)
+
+  @@map("image_uploads")
 }

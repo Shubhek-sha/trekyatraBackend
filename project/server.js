@@ -7,6 +7,7 @@ import recommendationRoutes from './routes/recommendation.routes.js';
 import trekRoutes from './routes/trek.routes.js';
 import imageRoutes from './routes/image.routes.js';
 import reviewRoutes from './routes/review.routes.js';
+import imageUploadRoutes from './routes/image_upload.routes.js';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use('/api/recommend', recommendationRoutes);
 app.use('/api/treks', trekRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/image-uploads', imageUploadRoutes);
 
 //serve images
 app.use('/uploads', express.static('uploads'));
