@@ -1,7 +1,4 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
@@ -12,62 +9,85 @@ datasource db {
 }
 
 model User {
-  user_id                Int         @id @default(autoincrement())
-  email                  String      @unique
+  user_id                Int           @id @default(autoincrement())
+  email                  String        @unique
   password_hash          String
   full_name              String?
-  username               String?     @unique
+  username               String?       @unique
   profile_picture        String?
   phone                  String?
-  date_of_birth          DateTime?   @db.Date
+  date_of_birth          DateTime?     @db.Date
   fitness_level          Int?
   preferred_difficulty   String?
   preferred_max_duration Int?
-  location_country       String?     @default("Nepal")
+  location_country       String?       @default("Nepal")
   location_city          String?
-  bio                    String?     @db.Text
+  bio                    String?       @db.Text
   otp                    String?
   otp_expires            DateTime?
-  isVerified             Boolean     @default(false)
+  isVerified             Boolean       @default(false)
   trek_images            TrekImage[]
+  reviews                Review[]
+  image_uploads          ImageUpload[]
 
   @@map("users")
 }
 
 model Trek {
-  trek_id                           Int         @id @default(autoincrement())
-  name                              String
-  slug                              String      @unique
-  location                          String?
-  region                            String?
-  country                           String?
-  difficulty                        String?
-  duration_days                     Int?
-  distance_km                       Decimal?    @db.Decimal(10, 2)
-  max_altitude                      Int?
-  altitude_gain                     Int?
-  starting_point                    String?
-  ending_point                      String?
-  daily_trek_hours                  Int?
-  temperature_range                 String?
-  permits_required                  String?
-  guide_mandatory                   Int?        @default(0) // 1 or 0
-  fitness_level_required            Int?
-  water_availability                Int?        @default(1) // 1 or 0
-  food_availability                 Int?        @default(1) // 1 or 0
-  mobile_network_availability       Int?        @default(1) // 1 or 0
-  risk_level                        String?
-  altitude_sickness_risk            String? // enum "high"/"low"
-  nearest_medical_facility_distance Decimal?    @db.Decimal(10, 2)
-  evacuation_possible               Int?        @default(1) // 1 or 0
-  cost_min_usd                      Decimal?    @db.Decimal(10, 2)
-  cost_max_usd                      Decimal?    @db.Decimal(10, 2)
-  cultural_significance             String?     @db.Text
-  group_size_min                    Int?
-  group_size_max                    Int?
-  popularity_score                  Int?        @default(0)
-  is_active                         Int?        @default(1) // 1 or 0
-  trek_images                       TrekImage[]
+  id                       String        @id @default(cuid())
+  trekId                   String        @unique
+  name                     String
+  location                 String
+  region                   String
+  country                  String
+  difficulty               String
+  durationDays             Int
+  distanceKm               Float
+  maxAltitudeM             Int
+  altitudeGainM            Int
+  terrainTypes             Json
+  bestSeasons              Json
+  temperatureMin           Int
+  temperatureMax           Int
+  permitsRequired          Boolean
+  permitDetails            String?       @db.Text
+  guideMandatory           Boolean
+  fitnessLevelRequired     String
+  startingPoint            String
+  endingPoint              String
+  baseCampAltitudeM        Int?
+  dailyTrekHours           Float
+  accommodationType        Json
+  waterAvailability        String
+  mobileNetwork            String
+  riskLevel                String
+  altitudeSicknessRisk     String
+  nearestMedicalFacilityKm Float
+  evacuationPossible       Boolean
+  estimatedCostMinUsd      Int
+  estimatedCostMaxUsd      Int
+  currency                 String        @default("USD")
+  attractions              Json
+  wildlifePossible         Json
+  culturalSignificance     String?       @db.Text
+  averageRating            Float         @default(0)
+  totalReviews             Int           @default(0)
+  popularityScore          Int           @default(0)
+  foodAvailability         String
+  languageSpoken           Json
+  groupSizeMin             Int
+  groupSizeMax             Int
+  province                 String
+  bestFor                  Json
+  description              String        @db.Text
+  shortDescription         String        @db.Text
+  images                   Json
+  itinerary                Json
+  createdAt                DateTime      @default(now())
+  updatedAt                DateTime      @updatedAt
+  trek_images              TrekImage[]
+  reviews                  Review[]
+  image_uploads            ImageUpload[]
 
   @@map("treks")
 }
@@ -75,14 +95,94 @@ model Trek {
 model TrekImage {
   image_id   Int     @id @default(autoincrement())
   user_id    Int
-  trek_id    Int
+  trekId     String // matches Trek.trekId type (String)
   url        String
   caption    String?
   is_cover   Int     @default(0)
   sort_order Int?    @default(0)
 
+  // All Trek fields for caching/duplication
+  name                     String
+  location                 String
+  region                   String
+  country                  String
+  difficulty               String
+  durationDays             Int
+  distanceKm               Float
+  maxAltitudeM             Int
+  altitudeGainM            Int
+  terrainTypes             Json // ["mountain", "glacier", ...]
+  bestSeasons              Json // ["spring", "autumn"]
+  temperatureMin           Int
+  temperatureMax           Int
+  permitsRequired          Boolean
+  permitDetails            String?  @db.Text
+  guideMandatory           Boolean
+  fitnessLevelRequired     String
+  startingPoint            String
+  endingPoint              String
+  baseCampAltitudeM        Int?
+  dailyTrekHours           Float
+  accommodationType        Json // ["teahouse", "lodge", ...]
+  waterAvailability        String
+  mobileNetwork            String
+  riskLevel                String
+  altitudeSicknessRisk     String
+  nearestMedicalFacilityKm Float
+  evacuationPossible       Boolean
+  estimatedCostMinUsd      Int
+  estimatedCostMaxUsd      Int
+  currency                 String   @default("USD")
+  attractions              Json // ["Mount Everest", ...]
+  wildlifePossible         Json // ["Snow Leopard", ...]
+  culturalSignificance     String?  @db.Text
+  averageRating            Float    @default(0)
+  totalReviews             Int      @default(0)
+  popularityScore          Int      @default(0)
+  foodAvailability         String
+  languageSpoken           Json // ["Nepali", "English"]
+  groupSizeMin             Int
+  groupSizeMax             Int
+  province                 String
+  bestFor                  Json // ["adventure seekers", ...]
+  description              String   @db.Text
+  shortDescription         String   @db.Text
+  images                   Json // ["https://...", ...]
+  itinerary                Json // [{ day, place, latitude, longitude, description }]
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
   user User? @relation(fields: [user_id], references: [user_id])
-  trek Trek? @relation(fields: [trek_id], references: [trek_id])
+  trek Trek? @relation(fields: [trekId], references: [trekId])
 
   @@map("trek_images")
+}
+
+model Review {
+  reviewId  Int      @id @default(autoincrement())
+  userId    Int
+  trekId    String
+  rating    Int
+  review    String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+  trek Trek @relation(fields: [trekId], references: [trekId], onDelete: Cascade)
+
+  @@map("reviews")
+}
+
+model ImageUpload {
+  imageId   Int      @id @default(autoincrement())
+  userId    Int
+  trekId    String
+  images    Json // Using Json to store an array of image strings natively in MySQL
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+  trek Trek @relation(fields: [trekId], references: [trekId], onDelete: Cascade)
+
+  @@map("image_uploads")
 }
