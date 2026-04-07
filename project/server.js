@@ -26,8 +26,6 @@ app.use('/api/images', imageRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/image-uploads', imageUploadRoutes);
 app.use('/api/interactions', interactionRoutes);
-//serve images
-app.use('/uploads', express.static('uploads'));
 
 app.get('/', (req, res) => {
   res.send('Server running');
