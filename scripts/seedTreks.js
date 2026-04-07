@@ -1,9 +1,9 @@
 import 'dotenv/config';
-import { PrismaClient } from '@prisma/client';
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
+import {PrismaClient} from '@prisma/client';
+import {PrismaMariaDb} from '@prisma/adapter-mariadb';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import {fileURLToPath} from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,14 +19,14 @@ const adapter = new PrismaMariaDb({
   acquireTimeout: 10000,
 });
 
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient({adapter});
 
 async function seedTreks() {
   try {
     // Read the JSON file
-    const dataPath = path.join(__dirname, '..', 'data', 'final_trek_dataset_with_province.json');
+    const dataPath = path.join(__dirname, '..', 'data', 'final_trek_dataset_updated_final.json');
     const rawData = fs.readFileSync(dataPath, 'utf-8');
-    const { treks } = JSON.parse(rawData);
+    const {treks} = JSON.parse(rawData);
 
     console.log(`Found ${treks.length} treks in JSON file`);
 
@@ -124,17 +124,17 @@ async function seedTreks() {
     const failed = [];
     for (const trek of transformedTreks) {
       try {
-        await prisma.trek.create({ data: trek });
+        await prisma.trek.create({data: trek});
         inserted++;
       } catch (err) {
-        failed.push({ trekId: trek.trekId, error: err.message });
+        failed.push({trekId: trek.trekId, error: err.message});
       }
     }
 
     console.log(`\n✅ Successfully seeded ${inserted} treks!`);
     if (failed.length > 0) {
       console.log(`❌ Failed to seed ${failed.length} treks:`);
-      failed.forEach(f => console.log(`  - ${f.trekId}: ${f.error.substring(0, 100)}...`));
+      failed.forEach((f) => console.log(`  - ${f.trekId}: ${f.error.substring(0, 100)}...`));
     }
 
     // Verify by fetching one trek with all fields
@@ -156,7 +156,6 @@ async function seedTreks() {
     // Count total treks in DB
     const finalCount = await prisma.trek.count();
     console.log(`\n📊 Total treks in database: ${finalCount}`);
-
   } catch (error) {
     console.error('Error seeding treks:', error);
     process.exit(1);
