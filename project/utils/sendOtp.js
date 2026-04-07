@@ -1,5 +1,7 @@
 // services/sendOtp.js
 import nodemailer from 'nodemailer';
+import dns from 'dns';
+dns.setDefaultResultOrder('ipv4first');
 
 export const sendOtp = async (email, otp) => {
   try {
