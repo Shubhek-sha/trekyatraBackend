@@ -29,6 +29,7 @@ model User {
   trek_images            TrekImage[]
   reviews                Review[]
   image_uploads          ImageUpload[]
+  interactions           Interaction[]
 
   @@map("users")
 }
@@ -88,6 +89,7 @@ model Trek {
   trek_images              TrekImage[]
   reviews                  Review[]
   image_uploads            ImageUpload[]
+  interactions             Interaction[]
 
   @@map("treks")
 }
@@ -185,4 +187,23 @@ model ImageUpload {
   trek Trek @relation(fields: [trekId], references: [trekId], onDelete: Cascade)
 
   @@map("image_uploads")
+}
+
+model Interaction {
+  interactionId    Int      @id @default(autoincrement())
+  userId           Int
+  trekId           String
+  views            Int      @default(0)
+  booked           Boolean  @default(false)
+  favorites        Boolean  @default(false)
+  rating           Float?
+  timeSpentSeconds Int      @default(0)
+  weight           Float    @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
+  trek Trek @relation(fields: [trekId], references: [trekId], onDelete: Cascade)
+
+  @@map("interactions")
 }

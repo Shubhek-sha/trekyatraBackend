@@ -226,3 +226,48 @@ export const updatePassword = async (req, res) => {
     res.status(500).json({error: error.message});
   }
 };
+
+// GOOGLE LOGIN
+export const googleLogin = async (req, res) => {
+  const {email, full_name, profile_picture} = req.body;
+
+  try {
+    let user = await prisma.user.findUnique({
+      where: {email},
+    });
+
+    if (!user) {
+      const randomPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+
+      user = await prisma.user.create({
+        data: {
+          email,
+          password_hash: hashedPassword,
+          full_name: full_name || null,
+          username: full_name
+            ? full_name.replace(/\s+/g, '') + Math.floor(1000 + Math.random() * 9000)
+            : 'user' + Math.floor(10000 + Math.random() * 90000),
+          profile_picture: profile_picture || null,
+          isVerified: true,
+        },
+      });
+    }
+
+    const token = jwt.sign({id: user.user_id}, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
+
+    // Remove sensitive info
+    const {password_hash, otp, otp_expires, ...userWithoutSensitive} = user;
+
+    res.json({
+      message: 'Google login successful',
+      token: token,
+      user: userWithoutSensitive,
+    });
+  } catch (error) {
+    console.error('Google login error:', error);
+    res.status(500).json({error: error.message});
+  }
+};
