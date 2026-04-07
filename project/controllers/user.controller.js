@@ -157,13 +157,9 @@ export const getAllUsers = async (req, res) => {
         username: true,
         profile_picture: true,
         phone: true,
-        date_of_birth: true,
-        fitness_level: true,
-        preferred_difficulty: true,
-        preferred_max_duration: true,
-        location_country: true,
-        location_city: true,
         bio: true,
+        isPreferenceSet: true,
+        preference: true,
         isVerified: true,
         otp: true,
       },
@@ -187,13 +183,9 @@ export const getProfile = async (req, res) => {
         username: true,
         profile_picture: true,
         phone: true,
-        date_of_birth: true,
-        fitness_level: true,
-        preferred_difficulty: true,
-        preferred_max_duration: true,
-        location_country: true,
-        location_city: true,
         bio: true,
+        isPreferenceSet: true,
+        preference: true,
       },
     });
 
@@ -269,5 +261,45 @@ export const googleLogin = async (req, res) => {
   } catch (error) {
     console.error('Google login error:', error);
     res.status(500).json({error: error.message});
+  }
+};
+
+// UPDATE PREFERENCE
+export const updatePreference = async (req, res) => {
+  const { userId } = req.params;
+  const { preference } = req.body;
+  
+  if (!preference) {
+    return res.status(400).json({ message: 'Preference data is required' });
+  }
+
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { user_id: parseInt(userId, 10) },
+      data: {
+        preference: preference,
+        isPreferenceSet: true
+      },
+      select: {
+        user_id: true,
+        email: true,
+        full_name: true,
+        username: true,
+        profile_picture: true,
+        phone: true,
+        bio: true,
+        isPreferenceSet: true,
+        preference: true,
+        isVerified: true
+      }
+    });
+
+    res.json({
+      message: 'Preference updated successfully',
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Update preference error:', error);
+    res.status(500).json({ error: error.message });
   }
 };
