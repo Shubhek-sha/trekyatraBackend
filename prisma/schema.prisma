@@ -9,27 +9,23 @@ datasource db {
 }
 
 model User {
-  user_id                Int           @id @default(autoincrement())
-  email                  String        @unique
-  password_hash          String
-  full_name              String?
-  username               String?       @unique
-  profile_picture        String?
-  phone                  String?
-  date_of_birth          DateTime?     @db.Date
-  fitness_level          Int?
-  preferred_difficulty   String?
-  preferred_max_duration Int?
-  location_country       String?       @default("Nepal")
-  location_city          String?
-  bio                    String?       @db.Text
-  otp                    String?
-  otp_expires            DateTime?
-  isVerified             Boolean       @default(false)
-  trek_images            TrekImage[]
-  reviews                Review[]
-  image_uploads          ImageUpload[]
-  interactions           Interaction[]
+  user_id         Int           @id @default(autoincrement())
+  email           String        @unique
+  password_hash   String
+  full_name       String?
+  username        String?       @unique
+  profile_picture String?
+  phone           String?
+  bio             String?       @db.Text
+  isPreferenceSet Boolean       @default(false)
+  preference      Json?
+  otp             String?
+  otp_expires     DateTime?
+  isVerified      Boolean       @default(false)
+  trek_images     TrekImage[]
+  reviews         Review[]
+  image_uploads   ImageUpload[]
+  interactions    Interaction[]
 
   @@map("users")
 }

@@ -1,6 +1,8 @@
 // services/sendOtp.js
 import nodemailer from 'nodemailer';
 
+// re_Dp6EPYxv_3ExHgHAxTmPnJvf9D3FH8avi
+
 export const sendOtp = async (email, otp) => {
   try {
     const transporter = nodemailer.createTransport({

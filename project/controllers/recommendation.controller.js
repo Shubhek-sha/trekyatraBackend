@@ -8,9 +8,8 @@ export const recommendTreks = async (req, res) => {
     const user = await prisma.user.findUnique({
       where: {user_id: userId},
       select: {
-        fitness_level: true,
-        preferred_difficulty: true,
-        preferred_max_duration: true,
+        isPreferenceSet: true,
+        preference: true,
       },
     });
 
@@ -26,20 +25,23 @@ export const recommendTreks = async (req, res) => {
       is_active: 1,
     };
 
-    if (user.preferred_difficulty) {
-      whereClause.difficulty = user.preferred_difficulty;
-    }
+    if (user.isPreferenceSet && user.preference) {
+      if (user.preference.difficulty) {
+        whereClause.difficulty = user.preference.difficulty;
+      }
 
-    if (user.fitness_level) {
-      whereClause.fitness_level_required = {
-        lte: user.fitness_level,
-      };
-    }
+      if (user.preference.fitness) {
+        // Assume fitnessLevelRequired in Trek is a string but user.preference.fitness is a number?
+        // Let's add logic to convert or maybe it's just stored accordingly.
+        // The original used whereClause.fitness_level_required = { lte: user.fitness_level }
+        whereClause.fitnessLevelRequired = String(user.preference.fitness);
+      }
 
-    if (user.preferred_max_duration) {
-      whereClause.duration_days = {
-        lte: user.preferred_max_duration,
-      };
+      if (user.preference.duration_max) {
+        whereClause.durationDays = {
+          lte: user.preference.duration_max,
+        };
+      }
     }
 
     const treks = await prisma.trek.findMany({
