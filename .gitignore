@@ -22,3 +22,6 @@ coverage/
 dist/
 build/
 /generated/prisma
+
+# Anthropic / Claude
+.anthropic/
