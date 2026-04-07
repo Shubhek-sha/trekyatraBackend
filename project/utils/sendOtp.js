@@ -1,22 +1,12 @@
 // services/sendOtp.js
-import nodemailer from 'nodemailer';
-import dns from 'dns';
-dns.setDefaultResultOrder('ipv4first');
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendOtp = async (email, otp) => {
   try {
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: `"TrekYatra" <${process.env.EMAIL_USER}>`,
+    await resend.emails.send({
+      from: 'TrekYatra <onboarding@resend.dev>',
       to: email,
       subject: '🏔️ Your Verification Code',
       text: `Your OTP is ${otp}. Valid for 1 minute.`,
