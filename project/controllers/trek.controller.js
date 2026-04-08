@@ -1,7 +1,4 @@
-// controllers/trek.controller.js
 import prisma from '../config/prisma.js';
-
-// ─── CREATE ───────────────────────────────────────────────────────────────────
 
 export const createTrek = async (req, res) => {
   try {
@@ -126,8 +123,6 @@ export const createTrek = async (req, res) => {
   }
 };
 
-// ─── READ ALL ─────────────────────────────────────────────────────────────────
-
 export const getAllTreks = async (req, res) => {
   try {
     const {
@@ -206,8 +201,6 @@ export const getAllTreks = async (req, res) => {
   }
 };
 
-// ─── READ ONE ─────────────────────────────────────────────────────────────────
-
 export const getTrekById = async (req, res) => {
   try {
     const {id} = req.params;
@@ -223,8 +216,6 @@ export const getTrekById = async (req, res) => {
     return res.status(500).json({success: false, message: 'Internal server error'});
   }
 };
-
-// ─── UPDATE ───────────────────────────────────────────────────────────────────
 
 export const updateTrek = async (req, res) => {
   try {
@@ -259,8 +250,6 @@ export const updateTrek = async (req, res) => {
   }
 };
 
-// ─── DELETE ───────────────────────────────────────────────────────────────────
-
 export const deleteTrek = async (req, res) => {
   try {
     const {id} = req.params;
@@ -280,8 +269,6 @@ export const deleteTrek = async (req, res) => {
     return res.status(500).json({success: false, message: 'Internal server error'});
   }
 };
-
-// ─── ITINERARY ────────────────────────────────────────────────────────────────
 
 export const updateItinerary = async (req, res) => {
   try {
