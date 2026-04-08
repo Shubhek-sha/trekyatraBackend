@@ -201,5 +201,6 @@ model Interaction {
   user User @relation(fields: [userId], references: [user_id], onDelete: Cascade)
   trek Trek @relation(fields: [trekId], references: [trekId], onDelete: Cascade)
 
+  @@unique([userId, trekId])
   @@map("interactions")
 }
