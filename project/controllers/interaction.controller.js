@@ -55,7 +55,6 @@ export const getAllInteractions = async (req, res) => {
 
     const interactions = await prisma.interaction.findMany({
       where,
-      include: {user: true, trek: true},
     });
 
     return res.status(200).json({
@@ -74,7 +73,6 @@ export const getInteractionById = async (req, res) => {
     const {id} = req.params;
     const interaction = await prisma.interaction.findUnique({
       where: {interactionId: Number(id)},
-      include: {user: true, trek: true},
     });
 
     if (!interaction) {
