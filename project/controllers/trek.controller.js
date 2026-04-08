@@ -166,9 +166,9 @@ export const getAllTreks = async (req, res) => {
         : {}),
       ...(search && {
         OR: [
-          {name: {contains: search, mode: 'insensitive'}},
-          {shortDescription: {contains: search, mode: 'insensitive'}},
-          {location: {contains: search, mode: 'insensitive'}},
+          {name: {contains: search}},
+          {shortDescription: {contains: search}},
+          {location: {contains: search}},
         ],
       }),
     };
@@ -197,6 +197,114 @@ export const getAllTreks = async (req, res) => {
     });
   } catch (error) {
     console.error('getAllTreks error:', error);
+    return res.status(500).json({success: false, message: 'Internal server error'});
+  }
+};
+
+export const getTrendingTreks = async (req, res) => {
+  try {
+    const {limit = '10'} = req.query;
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
+
+    // 1. Group reviews by trekId and count them
+    const reviewCounts = await prisma.review.groupBy({
+      by: ['trekId'],
+      _count: {
+        trekId: true,
+      },
+      _avg: {
+        rating: true,
+      },
+      orderBy: [
+        {
+          _count: {
+            trekId: 'desc',
+          },
+        },
+        {
+          _avg: {
+            rating: 'desc',
+          },
+        },
+      ],
+      take: limitNum,
+    });
+
+    if (reviewCounts.length === 0) {
+      return res.status(200).json({
+        success: true,
+        data: [],
+        message: 'No reviews found to determine trending treks',
+      });
+    }
+
+    // 2. Fetch full trek details for these trekIds
+    const trekIds = reviewCounts.map((rc) => rc.trekId);
+    const treks = await prisma.trek.findMany({
+      where: {
+        trekId: {
+          in: trekIds,
+        },
+      },
+    });
+
+    // 3. Sort the treks based on the original group-by order
+    const sortedTreks = trekIds
+      .map((id) => {
+        const trek = treks.find((t) => t.trekId === id);
+        if (!trek) return null;
+        const stats = reviewCounts.find((rc) => rc.trekId === id);
+        return {
+          ...trek,
+          reviewCount: stats._count.trekId,
+          averageRatingFromReviews: stats._avg.rating,
+        };
+      })
+      .filter(Boolean);
+
+    return res.status(200).json({
+      success: true,
+      data: sortedTreks,
+    });
+  } catch (error) {
+    console.error('getTrendingTreks error:', error);
+    return res.status(500).json({success: false, message: 'Internal server error'});
+  }
+};
+
+export const getSimilarTreks = async (req, res) => {
+  try {
+    const {difficulty, excludeId, limit = '5'} = req.query;
+
+    if (!difficulty) {
+      return res.status(400).json({success: false, message: 'difficulty parameter is required'});
+    }
+
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
+
+    const similarTreks = await prisma.trek.findMany({
+      where: {
+        difficulty: {
+          contains: difficulty,
+        },
+        ...(excludeId && {
+          NOT: {
+            OR: [{id: excludeId}, {trekId: excludeId}],
+          },
+        }),
+      },
+      take: limitNum,
+      orderBy: {
+        popularityScore: 'desc',
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: similarTreks,
+    });
+  } catch (error) {
+    console.error('getSimilarTreks error:', error);
     return res.status(500).json({success: false, message: 'Internal server error'});
   }
 };
