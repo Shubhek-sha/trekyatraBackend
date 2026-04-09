@@ -4,17 +4,15 @@ import nodemailer from 'nodemailer';
 export const sendOtp = async (email, otp) => {
   try {
     const transporter = nodemailer.createTransport({
-      host: 'smtp-relay.brevo.com',
-      port: 465,
-      secure: true,
+      service: 'Gmail',
       auth: {
-        user: process.env.BREVO_SMTP_USER, // a767d5001@smtp-brevo.com
-        pass: process.env.BREVO_SMTP_KEY, // the full key ending in pZ5CnW
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
-    const result = await transporter.sendMail({
-      from: `"TrekYatra" <${process.env.BREVO_SENDER_EMAIL}>`, // Your verified sender email
+    await transporter.sendMail({
+      from: `"TrekYatra" <${process.env.EMAIL_USER}>`,
       to: email, // Dynamic recipient - sends to the user who requested OTP
       subject: '🏔️ Your Verification Code',
       text: `Your OTP is ${otp}. Valid for 1 minute.`,
@@ -113,12 +111,7 @@ export const sendOtp = async (email, otp) => {
       `,
     });
 
-    if (error) {
-      console.error('Resend API error:', error);
-      return {success: false, error: 'Failed to send OTP via Resend'};
-    }
-
-    return {success: true, data};
+    return {success: true};
   } catch (error) {
     console.error('Failed to send OTP:', error);
     return {success: false, error: 'Failed to send OTP'};
