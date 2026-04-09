@@ -406,3 +406,29 @@ export const updateItinerary = async (req, res) => {
     return res.status(500).json({success: false, message: 'Internal server error'});
   }
 };
+
+export const searchTrekByName = async (req, res) => {
+  try {
+    const {name} = req.query;
+
+    if (!name) {
+      return res.status(400).json({success: false, message: 'Name query parameter is required'});
+    }
+
+    const treks = await prisma.trek.findMany({
+      where: {
+        name: {
+          contains: name,
+        },
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: treks,
+    });
+  } catch (error) {
+    console.error('searchTrekByName error:', error);
+    return res.status(500).json({success: false, message: 'Internal server error'});
+  }
+};
