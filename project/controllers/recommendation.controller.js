@@ -138,7 +138,7 @@ export const recommendForUserUsingModel = async (req, res) => {
     };
 
     // 6. Trigger the Flask API
-    const flaskResponse = await fetch('http://localhost:5001/recommend/hybrid', {
+    const flaskResponse = await fetch('https://trekyatramodel.onrender.com/recommend/hybrid', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
