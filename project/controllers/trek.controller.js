@@ -230,41 +230,60 @@ export const getTrendingTreks = async (req, res) => {
       take: limitNum,
     });
 
-    if (reviewCounts.length === 0) {
-      return res.status(200).json({
-        success: true,
-        data: [],
-        message: 'No reviews found to determine trending treks',
+    const reviewedTrekIds = reviewCounts.map((rc) => rc.trekId);
+    let trendingTreks = [];
+
+    if (reviewedTrekIds.length > 0) {
+      // Fetch full trek details for these trekIds
+      const treks = await prisma.trek.findMany({
+        where: {
+          trekId: {
+            in: reviewedTrekIds,
+          },
+        },
       });
+
+      // Map and sort based on review statistics
+      trendingTreks = reviewedTrekIds
+        .map((id) => {
+          const trek = treks.find((t) => t.trekId === id);
+          if (!trek) return null;
+          const stats = reviewCounts.find((rc) => rc.trekId === id);
+          return {
+            ...trek,
+            reviewCount: stats._count.trekId,
+            averageRatingFromReviews: stats._avg.rating,
+          };
+        })
+        .filter(Boolean);
     }
 
-    // 2. Fetch full trek details for these trekIds
-    const trekIds = reviewCounts.map((rc) => rc.trekId);
-    const treks = await prisma.trek.findMany({
-      where: {
-        trekId: {
-          in: trekIds,
+    // 3. Fallback/Padding: If we have fewer than limitNum, fill with top rated treks
+    if (trendingTreks.length < limitNum) {
+      const additionalLimit = limitNum - trendingTreks.length;
+      const additionalTreks = await prisma.trek.findMany({
+        where: {
+          NOT: {
+            trekId: {in: reviewedTrekIds},
+          },
         },
-      },
-    });
+        take: additionalLimit,
+        orderBy: [{averageRating: 'desc'}, {popularityScore: 'desc'}],
+      });
 
-    // 3. Sort the treks based on the original group-by order
-    const sortedTreks = trekIds
-      .map((id) => {
-        const trek = treks.find((t) => t.trekId === id);
-        if (!trek) return null;
-        const stats = reviewCounts.find((rc) => rc.trekId === id);
-        return {
-          ...trek,
-          reviewCount: stats._count.trekId,
-          averageRatingFromReviews: stats._avg.rating,
-        };
-      })
-      .filter(Boolean);
+      const paddedTreks = additionalTreks.map((t) => ({
+        ...t,
+        reviewCount: t.totalReviews,
+        averageRatingFromReviews: t.averageRating,
+      }));
+
+      trendingTreks = [...trendingTreks, ...paddedTreks];
+    }
 
     return res.status(200).json({
       success: true,
-      data: sortedTreks,
+      data: trendingTreks,
+      message: reviewedTrekIds.length === 0 ? 'No reviews found, returning top rated treks' : undefined,
     });
   } catch (error) {
     console.error('getTrendingTreks error:', error);
