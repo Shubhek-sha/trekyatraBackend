@@ -266,19 +266,19 @@ export const googleLogin = async (req, res) => {
 
 // UPDATE PREFERENCE
 export const updatePreference = async (req, res) => {
-  const { userId } = req.params;
-  const { preference } = req.body;
-  
+  const {userId} = req.params;
+  const {preference} = req.body;
+
   if (!preference) {
-    return res.status(400).json({ message: 'Preference data is required' });
+    return res.status(400).json({message: 'Preference data is required'});
   }
 
   try {
     const updatedUser = await prisma.user.update({
-      where: { user_id: parseInt(userId, 10) },
+      where: {user_id: parseInt(userId, 10)},
       data: {
         preference: preference,
-        isPreferenceSet: true
+        isPreferenceSet: true,
       },
       select: {
         user_id: true,
@@ -290,16 +290,40 @@ export const updatePreference = async (req, res) => {
         bio: true,
         isPreferenceSet: true,
         preference: true,
-        isVerified: true
-      }
+        isVerified: true,
+      },
     });
 
     res.json({
       message: 'Preference updated successfully',
-      user: updatedUser
+      user: updatedUser,
     });
   } catch (error) {
     console.error('Update preference error:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({error: error.message});
+  }
+};
+
+// DELETE USER
+export const deleteUser = async (req, res) => {
+  try {
+    const {userId} = req.params;
+
+    const existingUser = await prisma.user.findUnique({
+      where: {user_id: parseInt(userId, 10)},
+    });
+
+    if (!existingUser) {
+      return res.status(404).json({message: 'User not found'});
+    }
+
+    await prisma.user.delete({
+      where: {user_id: parseInt(userId, 10)},
+    });
+
+    res.json({message: 'User deleted successfully'});
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({error: error.message});
   }
 };
