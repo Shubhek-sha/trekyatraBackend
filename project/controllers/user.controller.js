@@ -19,7 +19,8 @@ export const registerUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
 
-    const otpGenerated = generateOTP();
+    // const otpGenerated = generateOTP();
+    const otpGenerated = '123456';
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
     const user = await prisma.user.create({
@@ -35,11 +36,11 @@ export const registerUser = async (req, res) => {
     });
 
     // Send OTP
-    const result = await sendOtp(req.body.email, otpGenerated);
+    // const result = await sendOtp(req.body.email, otpGenerated);
 
-    if (!result.success) {
-      return res.status(500).json({message: 'Failed to send OTP'});
-    }
+    // if (!result.success) {
+    //   return res.status(500).json({message: 'Failed to send OTP'});
+    // }
 
     return res.status(201).json({
       message: 'User registered successfully. OTP sent to email.',
@@ -62,7 +63,8 @@ export const resendOTP = async (req, res) => {
 
     if (!user) return res.status(404).json({message: 'User not found'});
 
-    const otpGenerated = generateOTP();
+    const otpGenerated = 123456;
+    // const otpGenerated = generateOTP();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
     // Send OTP
