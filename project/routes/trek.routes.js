@@ -1,17 +1,18 @@
-import express from "express";
+// routes/trek.routes.js
 
-import {
-  fetchTreks,
-  fetchSingleTrek,
-  addTrek,
-} from "../controllers/trek.controller.js";
+import {Router} from 'express';
+import {createTrek, getAllTreks, getTrekById, updateTrek, deleteTrek, updateItinerary, getTrendingTreks, getSimilarTreks, searchTrekByName} from '../controllers/trek.controller.js';
 
-const router = express.Router();
+const router = Router();
 
-router.get("/", fetchTreks);
-
-router.get("/:id", fetchSingleTrek);
-
-router.post("/", addTrek);
+router.get('/', getAllTreks);
+router.get('/trending', getTrendingTreks);
+router.get('/similar', getSimilarTreks);
+router.get('/search', searchTrekByName);
+router.post('/', createTrek);
+router.get('/:id', getTrekById);
+router.patch('/:id', updateTrek);
+router.delete('/:id', deleteTrek);
+router.patch('/:id/itinerary', updateItinerary);
 
 export default router;

@@ -21,3 +21,7 @@ coverage/
 # Optional: build output
 dist/
 build/
+/generated/prisma
+
+# Anthropic / Claude
+.anthropic/
